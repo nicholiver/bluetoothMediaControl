@@ -2,6 +2,9 @@
 #include "OneButton.h"
 #include <BleKeyboard.h>
 
+#define threshold 75
+touch_pad_t touchPin;
+
 hw_timer_t * timer = NULL;
 
 OneButton playPauseButton (2,false);
@@ -24,6 +27,7 @@ void previousTrack();
 
 void setup() {
   Serial.begin(115200);
+  delay(1000);
   playPauseButton.attachClick(playPause);
   playPauseButton.attachLongPressStart(stop);
   incNextButton.attachClick(increaseVolume);
@@ -32,7 +36,7 @@ void setup() {
   decPrevButton.attachDoubleClick(previousTrack);
   Serial.println("ready");
 
-
+  
   Serial.println("Starting BLE work!");
   bleKeyboard.begin();
 
@@ -45,9 +49,9 @@ void loop() {
   playPauseButton.tick();
   incNextButton.tick();
   decPrevButton.tick();
-  if(currentTime-previousTime > 30000){
+  if(currentTime-previousTime > 10000){
+    touchSleepWakeUpEnable(13, threshold);
     Serial.println("going to sleep...");
-    esp_sleep_enable_ext0_wakeup(GPIO_NUM_2,1);
     esp_deep_sleep_start();
   }
 }
